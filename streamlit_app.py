@@ -5,6 +5,7 @@ import numpy as np
 st.set_page_config(
     page_title="Real Estate Financing Scenarios",
     page_icon="🏗️",
+    layout="wide",  
     initial_sidebar_state="expanded",
 )
 
@@ -47,6 +48,50 @@ def calculate_multiplier(own_equity_pct):
     return 1 / own_equity_pct if own_equity_pct > 0 else float('inf')
 
 st.title('Real Estate Development Financing Scenarios')
+
+# Requirements section
+st.markdown("## State of the Project")
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    land_acquired = st.radio("Land Acquired", ['Yes', 'No'], index=1)
+
+with col2:
+    presales = st.select_slider("Current Pre-sales (%)", options=[0, 25, 50, 75, 100], value=0)
+
+with col3:
+    if presales == 0:
+        st.markdown("### Construction Progress (%)")
+        st.markdown("**Construction progress cannot be set when there are no pre-sales.**")
+        construction_progress = 0
+    else:
+        construction_progress = st.select_slider("Construction Progress (%)", options=[i for i in range(0, presales + 1, 25)], value=min(25, presales))
+
+with col4:
+    location_options = ["Urban of a growing or coastal city", "Suburbs of a growing city", "Non-growing city"]
+    development_location = st.selectbox("Development Location", location_options)
+
+# Recommendations/Warnings/Considerations based on inputs
+st.markdown("## Recommendations/Warnings/Considerations")
+
+# Define logic for displaying recommendations based on conditions
+if development_location == "Non-growing city":
+    location_warning = " Note: Being in a non-growing city may alter access to financing conditions."
+else:
+    location_warning = ""
+
+if land_acquired == 'Yes':
+    if presales > 70 and construction_progress > 70:
+        st.success(f"Exceptional position to secure financing. Consider diversifying through crowdfunding or a private equity fund recap.{location_warning}")
+    elif 50 <= presales <= 60 and 50 <= construction_progress <= 60:
+        st.info(f"At this stage, the most common method available is mezzanine debt to build on top of the current financing structure.{location_warning}")
+    elif presales >= 50 and construction_progress < 50:
+        st.success(f"Very good position. Consider traditional banking financing as a construction loan.{location_warning}")
+    elif presales < 50 and construction_progress < 50:
+        st.warning(f"Does not meet requirements for traditional financing. Consider a construction loan from an alternative source such as senior debt or crowd lending.{location_warning}")
+else:  # Land not acquired
+    if presales < 50 and construction_progress < 50:
+        st.warning(f"Consider a short-term bridge loan through crowd lending or private debt funds to acquire the land and cover soft costs.{location_warning}")
 
 # User selects development phase
 development_phase = st.selectbox('Select Development Phase', list(development_phases.keys()))
@@ -130,7 +175,7 @@ if sum(equities[:-1]) > 1:
     st.error('The total equity cannot exceed 100%. Please adjust the financing method percentages.')
 else:
    # After selecting leverage percentages and before calculating WACC and other metrics
-    st.markdown('## Adjust Interest Rates')
+    st.markdown('### Adjust Interest Rates')
 
     # Hold the adjusted interest rates
     adjusted_interests = []
