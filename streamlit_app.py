@@ -93,8 +93,24 @@ else:  # Land not acquired
     if presales < 50 and construction_progress < 50:
         st.warning(f"Consider a short-term bridge loan through crowd lending or private debt funds to acquire the land and cover soft costs.{location_warning}")
 
-# User selects development phase
-development_phase = st.selectbox('Select Development Phase', list(development_phases.keys()))
+if land_acquired == 'No':
+    development_phase_default = 'Pre-Construction'
+elif land_acquired == 'Yes' and presales < 60:
+    development_phase_default = 'Construction'
+else:  # Land acquired and pre-sales >= 60
+    development_phase_default = 'Post-Construction'
+
+# Since we cannot dynamically set the value of a selectbox after it's been created,
+# we use a workaround by creating a dictionary that maps the development phase to an index.
+development_phase_options = list(development_phases.keys())
+development_phase_index = development_phase_options.index(development_phase_default)
+
+# Now we use the index to set the default value dynamically.
+development_phase = st.selectbox(
+    'Select Development Phase',
+    options=development_phase_options,
+    index=development_phase_index  # Dynamically set default value
+)
 
 # User selects development type
 development_type = st.selectbox('Select Development Type', list(development_types.keys()))
