@@ -57,41 +57,53 @@ with col1:
     land_acquired = st.radio("Land Acquired", ['Yes', 'No'], index=1)
 
 with col2:
-    presales = st.select_slider("Current Pre-sales (%)", options=[0, 25, 50, 75, 100], value=0)
+    if land_acquired == 'No':
+        presales_options = [0, 25]
+        presales = st.select_slider("Current Pre-sales (%)", options=presales_options, value=0)
+    else:
+        presales_options = [0, 25, 50, 75, 100]
+        presales = st.select_slider("Current Pre-sales (%)", options=presales_options, value=0)
 
 with col3:
-    if presales == 0:
+    # If land has not been acquired
+    if land_acquired == 'No':
+        st.markdown("### Construction Progress (%)")
+        st.markdown("**Land has not been acquired. Pre-sales are limited to a maximum of 25%, and construction progress is set to 0%.**")
+        construction_progress = 0
+    # If land has been acquired and there are no pre-sales
+    elif presales == 0:
         st.markdown("### Construction Progress (%)")
         st.markdown("**Construction progress cannot be set when there are no pre-sales.**")
         construction_progress = 0
+    # If land has been acquired and there are pre-sales
     else:
         construction_progress = st.select_slider("Construction Progress (%)", options=[i for i in range(0, presales + 1, 25)], value=min(25, presales))
 
 with col4:
-    location_options = ["Urban of a growing or coastal city", "Suburbs of a growing city", "Non-growing city"]
+    location_options = ["Urban of a growing or coastal city", "Suburbs of a growing city", "Non-growing or coastal city"]
     development_location = st.selectbox("Development Location", location_options)
 
 # Recommendations/Warnings/Considerations based on inputs
-st.markdown("## Recommendations/Warnings/Considerations")
+st.markdown("#### Recommendations/Warnings/Considerations")
 
 # Define logic for displaying recommendations based on conditions
-if development_location == "Non-growing city":
+if development_location == "Non-growing or coastal city":
     location_warning = " Note: Being in a non-growing city may alter access to financing conditions."
 else:
     location_warning = ""
 
 if land_acquired == 'Yes':
-    if presales > 70 and construction_progress > 70:
-        st.success(f"Exceptional position to secure financing. Consider diversifying through crowdfunding or a private equity fund recap.{location_warning}")
+    if presales > 70 and construction_progress > 50:
+        st.success(f"At this stage, recapitalization is a strategic choice that enables you to refresh your project's equity—substituting your initial investment with external capital for the final stages. This approach allows you to reallocate your resources to new ventures sooner, rather than waiting until the project's end. Consider exploring options like crowdfunding or private equity funds to make this transition efficiently and kickstart your next investment..{location_warning}")
     elif 50 <= presales <= 60 and 50 <= construction_progress <= 60:
-        st.info(f"At this stage, the most common method available is mezzanine debt to build on top of the current financing structure.{location_warning}")
+        st.info(f"In this construction phase, with pre-sales and progress both exceeding 50% but not yet reaching 60%, your project is in a strong position. If you've already secured financing through traditional banking or private debt but find yourself in need of further investment to complete construction and enhance sales, consider leveraging mezzanine debt. This option layers on top of your existing financing structure, offering the additional capital needed, albeit at a higher cost. Should you not yet have a banking loan, your project's current status also places you in an advantageous position to secure one..{location_warning}")
     elif presales >= 50 and construction_progress < 50:
-        st.success(f"Very good position. Consider traditional banking financing as a construction loan.{location_warning}")
+        st.success(f"At this juncture, with pre-sales surpassing 50% yet construction in its nascent stages or not yet commenced, you're ideally positioned to meet the prerequisites for traditional banking. This scenario presents a prime opportunity to secure a construction loan from a bank, providing you with the necessary funding to advance from initial construction phases to completion. Leveraging this financial avenue could significantly benefit your project's progression and financial structure.{location_warning}")
     elif presales < 50 and construction_progress < 50:
-        st.warning(f"Does not meet requirements for traditional financing. Consider a construction loan from an alternative source such as senior debt or crowd lending.{location_warning}")
+        st.warning(f"With pre-sales not reaching 50% and construction either not started or in the early stages, your project currently falls short of the requirements for more cost-effective traditional bank financing. However, your development can still progress by accessing alternative financing options. Consider obtaining a construction loan through senior debt from a private debt fund or tapping into crowd-lending platforms. These avenues can provide the necessary capital to move your project forward, albeit at a higher cost than traditional loans.{location_warning}")
 else:  # Land not acquired
     if presales < 50 and construction_progress < 50:
-        st.warning(f"Consider a short-term bridge loan through crowd lending or private debt funds to acquire the land and cover soft costs.{location_warning}")
+        st.warning(f"If you haven't acquired land or covered initial costs yet and pre-sales are low, a short-term bridge loan from private debt funds or crowd-lending platforms can be your lifeline. It’s designed to get your project to the point where it meets traditional banking requirements, allowing you to then secure a more affordable construction loan. This step is essential for moving your development forward efficiently.{location_warning}")
 
 if land_acquired == 'No':
     development_phase_default = 'Pre-Construction'
@@ -100,10 +112,13 @@ elif land_acquired == 'Yes' and presales < 60:
 else:  # Land acquired and pre-sales >= 60
     development_phase_default = 'Post-Construction'
 
+
 # Since we cannot dynamically set the value of a selectbox after it's been created,
 # we use a workaround by creating a dictionary that maps the development phase to an index.
 development_phase_options = list(development_phases.keys())
 development_phase_index = development_phase_options.index(development_phase_default)
+
+st.markdown("#### Scenario Builder")
 
 # Now we use the index to set the default value dynamically.
 development_phase = st.selectbox(
