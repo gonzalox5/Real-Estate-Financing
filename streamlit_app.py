@@ -318,8 +318,3 @@ else:
                     st.caption('Profit ($)')
                     st.write(f"${profit:,.2f}")
 
-
-    st.markdown('---')
-    st.subheader("Developer's Investment Details")
-    st.metric(label="Own Investment", value=f"${developer_own_equity_pct * total_investment:,.2f}")
-    st.metric(label="Developer Multiplier", value=f"{(developer_profit + (developer_own_equity_pct * total_investment))/ (developer_own_equity_pct * total_investment):.2f}")
